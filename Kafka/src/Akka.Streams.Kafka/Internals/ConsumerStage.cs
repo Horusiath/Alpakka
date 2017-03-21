@@ -3,7 +3,7 @@ using Akka.Streams.Stage;
 
 namespace Akka.Streams.Kafka.Internals
 {
-    internal class KafkaSourceStage<TKey, TVal, TMsg> : GraphStageWithMaterializedValue<SourceShape<TMsg>, IAsyncDisposable>
+    internal class KafkaSourceStage<TKey, TVal, TMsg> : GraphStageWithMaterializedValue<SourceShape<TMsg>, IDisposable>
     {
         protected readonly Outlet<TMsg> Out = new Outlet<TMsg>("out");
         public override SourceShape<TMsg> Shape { get; }
@@ -16,10 +16,10 @@ namespace Akka.Streams.Kafka.Internals
 
         protected Func<SourceShape<TMsg>, GraphStageLogic> Logic { get; }
 
-        public override ILogicAndMaterializedValue<IAsyncDisposable> CreateLogicAndMaterializedValue(Attributes inheritedAttributes)
+        public override ILogicAndMaterializedValue<IDisposable> CreateLogicAndMaterializedValue(Attributes inheritedAttributes)
         {
             var result = Logic(Shape);
-            return new LogicAndMaterializedValue<IAsyncDisposable>(result, (IAsyncDisposable)result);
+            return new LogicAndMaterializedValue<IDisposable>(result, (IDisposable)result);
         }
     }
 

@@ -15,7 +15,8 @@ namespace Akka.Streams.Kafka
 
             var keySerializer = system.Serialization.FindSerializerForType(typeof(TKey)).ToKafkaSerializer<TKey>();
             var valSerializer = system.Serialization.FindSerializerForType(typeof(TValue)).ToKafkaSerializer<TValue>();
-            return Create(system.Settings.Config.GetConfig("akka.kafka.producer"), keySerializer, valSerializer);
+            var config = system.Settings.Config.GetConfig("akka.kafka.producer");
+            return Create(config, keySerializer, valSerializer);
         }
 
         public static ProducerSettings<TKey, TValue> Create(Config config, ISerializer<TKey> keySerializer,
@@ -52,7 +53,7 @@ namespace Akka.Streams.Kafka
         }
 
         public ProducerSettings<TKey, TValue> WithBootstrapServers(string bootstrapServers) =>
-            WithProperty(Constants.BoostrapServers, bootstrapServers);
+            WithProperty(KafkaConfig.BoostrapServers, bootstrapServers);
 
         public ProducerSettings<TKey, TValue> WithProperty(string key, object value) =>
             Copy(properties: this.Properties.SetItem(key, value));

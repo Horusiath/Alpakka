@@ -65,13 +65,13 @@ namespace Akka.Streams.Kafka
         }
 
         public ConsumerSettings<TKey, TValue> WithBootstrapServers(string bootstrapServers) =>
-            Copy(properties: Properties.SetItem(Constants.BoostrapServers, bootstrapServers));
+            Copy(properties: Properties.SetItem(KafkaConfig.BoostrapServers, bootstrapServers));
 
         public ConsumerSettings<TKey, TValue> WithClientId(string clientId) =>
-            Copy(properties: Properties.SetItem(Constants.ClientId, clientId));
+            Copy(properties: Properties.SetItem(KafkaConfig.ClientId, clientId));
 
         public ConsumerSettings<TKey, TValue> WithGroupId(string groupId) =>
-                    Copy(properties: Properties.SetItem(Constants.GroupId, groupId));
+                    Copy(properties: Properties.SetItem(KafkaConfig.GroupId, groupId));
 
         public ConsumerSettings<TKey, TValue> WithProperty(string key, string value) =>
                     Copy(properties: Properties.SetItem(key, value));

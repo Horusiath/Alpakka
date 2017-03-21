@@ -68,15 +68,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Constants.cs" />
     <Compile Include="ConsumerMessages.cs" />
     <Compile Include="ConsumerSettings.cs" />
     <Compile Include="Extensions.cs" />
-    <Compile Include="IAsyncDisposable.cs" />
     <Compile Include="Internals\AsyncDisposer.cs" />
     <Compile Include="Internals\CommittableOffsetBatch.cs" />
     <Compile Include="Internals\ConsumerStage.cs" />
     <Compile Include="Internals\ProducerStage.cs" />
+    <Compile Include="KafkaConfig.cs" />
     <Compile Include="KafkaConsumer.cs" />
     <Compile Include="KafkaProducer.cs" />
     <Compile Include="MessageBuilder.cs" />

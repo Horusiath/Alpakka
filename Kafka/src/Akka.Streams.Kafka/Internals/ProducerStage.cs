@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Akka.Event;
 using Akka.Streams.Stage;
 using Akka.Util.Internal;
 using Confluent.Kafka;
@@ -9,20 +10,22 @@ namespace Akka.Streams.Kafka.Internals
 
     internal sealed class ProducerStage<TKey, TValue, TPass> : GraphStage<FlowShape<Message<TKey, TValue, TPass>, Task<Result<TKey, TValue, TPass>>>>
     {
-        public readonly Inlet<Message<TKey, TValue, TPass>> In = new Inlet<Message<TKey, TValue, TPass>>("messages");
-        public readonly Outlet<Task<Result<TKey, TValue, TPass>>> Out = new Outlet<Task<Result<TKey, TValue, TPass>>>("result");
+        public readonly Inlet<Message<TKey, TValue, TPass>> In = new Inlet<Message<TKey, TValue, TPass>>("kafka-in");
+        public readonly Outlet<Task<Result<TKey, TValue, TPass>>> Out = new Outlet<Task<Result<TKey, TValue, TPass>>>("kafka-out");
 
         private readonly TimeSpan closeTimeout;
+        private readonly ILoggingAdapter log;
         private readonly bool closeProducerOnStop;
         private readonly Func<Producer<TKey, TValue>> producerProvider;
 
         public override FlowShape<Message<TKey, TValue, TPass>, Task<Result<TKey, TValue, TPass>>> Shape { get; }
 
-        public ProducerStage(TimeSpan closeTimeout, bool closeProducerOnStop, Func<Producer<TKey, TValue>> producerProvider)
+        public ProducerStage(TimeSpan closeTimeout, bool closeProducerOnStop, Func<Producer<TKey, TValue>> producerProvider, ILoggingAdapter log)
         {
             this.closeTimeout = closeTimeout;
             this.closeProducerOnStop = closeProducerOnStop;
             this.producerProvider = producerProvider;
+            this.log = log;
             Shape = new FlowShape<Message<TKey, TValue, TPass>, Task<Result<TKey, TValue, TPass>>>(In, Out);
         }
 
@@ -68,15 +71,18 @@ namespace Akka.Streams.Kafka.Internals
 
             public override void PostStop()
             {
+                self.log.Debug("Stage completed");
                 if (self.closeProducerOnStop)
                 {
                     try
                     {
+                        producer.Flush();
                         producer.Dispose();
+                        self.log.Debug("Producer closed");
                     }
                     catch (Exception cause)
                     {
-
+                        self.log.Error(cause, "Problem occurred during producer close");
                     }
                 }
 
@@ -87,7 +93,7 @@ namespace Akka.Streams.Kafka.Internals
             {
                 var record = msg.Record;
                 var res = await producer.ProduceAsync(record.Topic, record.Key, record.Value, record.Partition);
-                return new Result<TKey, TValue, TPass>(null, msg);
+                return new Result<TKey, TValue, TPass>(res, msg);
             }
 
             private void CheckForCompletion()

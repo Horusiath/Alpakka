@@ -38,7 +38,7 @@ namespace Akka.Streams.Kafka.Internals
         public IImmutableDictionary<PartitionId, long> Offsets { get; }
 
         public Task CommitAsync() =>
-            Offsets.Count == 0 ? Task.CompletedTask : stages.First().Value.CommitAsync(this);
+            Offsets.Count == 0 ? Task.FromResult(0) : stages.First().Value.CommitAsync(this);
 
         public ICommittableOffsetBatch Updated(ICommittableOffset offset)
         {

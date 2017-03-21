@@ -1,4 +1,5 @@
-﻿using Akka.Actor;
+﻿using System;
+using Akka.Actor;
 using Confluent.Kafka;
 using Xunit.Abstractions;
 
@@ -11,7 +12,8 @@ namespace Akka.Streams.Kafka.Tests.Internals
         {
             var offset = new PartitionOffset(new PartitionId(group, topic, 1), seed);
             var record = new Message<string, string>(offset.Key.Topic, offset.Key.Partition, offset.Offset, seed.ToString(), seed.ToString(), default(Timestamp), null);
-            return new CommittableMessage<string, string>(offset, record);
+            //return new CommittableMessage<string, string>(offset, record);
+            throw new NotImplementedException();
         }
 
         public ConsumerSpec(ITestOutputHelper output) : base(output: output)

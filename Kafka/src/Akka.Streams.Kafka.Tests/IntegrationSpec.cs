@@ -1,5 +1,10 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using Akka.Actor;
+using Akka.Streams.Dsl;
+using Confluent.Kafka;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -10,13 +15,15 @@ namespace Akka.Streams.Kafka.Tests
         private const int Partition = 0;
         private readonly string uid = Guid.NewGuid().ToString("N");
         private readonly ActorMaterializer materializer;
-        private readonly ProducerSettings<byte[], byte[]> producerSettings;
+        private readonly ProducerSettings<byte[], string> producerSettings;
         private readonly string bootstrapServers = "localhost:8300";
+        private readonly string InitMsg =
+            "initial msg in topic, required to create the topic before any consumer subscribes to it";
 
         public IntegrationSpec(ITestOutputHelper output) : base(output: output)
         {
             materializer = Sys.Materializer();
-            producerSettings = ProducerSettings<byte[], byte[]>.Create(Sys);
+            producerSettings = ProducerSettings<byte[], string>.Create(Sys);
         }
 
         [Fact]
@@ -51,5 +58,22 @@ namespace Akka.Streams.Kafka.Tests
 
         private string CreateTopic(int n) => $"topic{n}-{uid}";
         private string CreateGroup(int n) => $"group{n}-{uid}";
+
+        private void GivenInitializedTopic(string topic)
+        {
+            using (var producer = producerSettings.CreateKafkaProducer())
+            {
+                producer.ProduceAsync(topic, new byte[0], InitMsg, Partition).Wait(TimeSpan.FromSeconds(60));
+            }
+        }
+
+        private async Task ProduceAsync<T>(string topic, IEnumerable<T> range)
+        {
+            var source = Source.From(range)
+                .Select(n =>
+                {
+                    return new Message<byte[], string, NotUsed>(new Message<byte[], string>(topic, Partition, new byte[0], n.ToString()));
+                })
+        }
     }
 }
