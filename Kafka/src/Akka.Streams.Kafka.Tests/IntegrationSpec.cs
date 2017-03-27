@@ -72,8 +72,10 @@ namespace Akka.Streams.Kafka.Tests
             var source = Source.From(range)
                 .Select(n =>
                 {
-                    return new Message<byte[], string, NotUsed>(new Message<byte[], string>(topic, Partition, new byte[0], n.ToString()));
-                })
+                    return
+                        new Message<byte[], string, NotUsed>(new Message<byte[], string>(topic, Partition, new byte[0],
+                            n.ToString()));
+                });
         }
     }
 }

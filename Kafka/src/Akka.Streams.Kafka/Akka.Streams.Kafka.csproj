@@ -74,7 +74,9 @@
     <Compile Include="Internals\AsyncDisposer.cs" />
     <Compile Include="Internals\CommittableOffsetBatch.cs" />
     <Compile Include="Internals\ConsumerStage.cs" />
+    <Compile Include="Internals\KafkaConsumerActor.cs" />
     <Compile Include="Internals\ProducerStage.cs" />
+    <Compile Include="Internals\SubSourceLogic.cs" />
     <Compile Include="KafkaConfig.cs" />
     <Compile Include="KafkaConsumer.cs" />
     <Compile Include="KafkaProducer.cs" />
